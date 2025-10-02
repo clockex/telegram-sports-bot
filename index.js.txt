@@ -1,0 +1,33 @@
+const TelegramBot = require('node-telegram-bot-api');
+const axios = require('axios');
+
+// 🔑 Replace with your values
+const BOT_TOKEN = "8285491277:AAHGqWrIWhIsUau20zGQeY65wW4QxpDP1Lk";
+const CHANNEL_ID = "-1003175844843";
+const API_KEY = "cb670fc5e0c4d621e59b376bad03ff36";
+
+const bot = new TelegramBot(BOT_TOKEN, { polling: false });
+
+async function getPrediction() {
+  try {
+    const url = `https://api.sportsdata.io/v4/soccer/scores/json/News?key=${API_KEY}`;
+    const res = await axios.get(url);
+    if (res.data.length > 0) {
+      return "⚽ " + res.data[0].Title;
+    } else {
+      return "⚽ Today's prediction: Team A will win against Team B!";
+    }
+  } catch (err) {
+    return "⚠️ Error fetching prediction.";
+  }
+}
+
+async function postPrediction() {
+  const prediction = await getPrediction();
+  await bot.sendMessage(CHANNEL_ID, prediction);
+  console.log("Posted:", prediction);
+}
+
+// Post every hour
+setInterval(postPrediction, 3600 * 1000);
+postPrediction(); // run once on start
